@@ -6,6 +6,8 @@ services:
     volumes:
       - ./frontend:/usr/share/nginx/html
       - ./default.conf:/etc/nginx/conf.d/default.conf
+    networks:
+      - front
   api:
     build: ./backend
     environment:
@@ -14,6 +16,8 @@ services:
       - MYSQL_USER=${MYSQL_USER}
       - MYSQL_PWD=${MYSQL_PASSWORD}
       - MYSQL_DB=todo
+    networks:
+      - back
   db:
     image: mysql
     volumes:
@@ -24,6 +28,11 @@ services:
       - MYSQL_USER=${MYSQL_USER}
       - MYSQL_PASSWORD=${MYSQL_PASSWORD}
       - MYSQL_DATABASE=todo
-
+    networks:
+      - back
 volumes:
   db-volume:
+
+networks:
+  front:
+  back:
