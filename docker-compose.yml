@@ -1,14 +1,20 @@
 services:
   nginx:
     image: nginx:1.27
-    ports:
-      - 80:80
     volumes:
       - ./frontend:/usr/share/nginx/html
       - ./default.conf:/etc/nginx/conf.d/default.conf
     networks:
-      - front
-      - back
+      - front # Voor scheiding van frontend verkeer
+      - traefik # Voor verbinding met de proxy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.nginx.rule=Host(`s143204.devops-ap.be`)"    
+      - "traefik.http.routers.nginx.entrypoints=websecure"
+      - "traefik.http.routers.nginx.tls=true"
+      - "traefik.http.routers.nginx.tls.certresolver=letsencrypt"
+      - "traefik.docker.network=traefik"
+
   api:
     build: ./backend
     environment:
@@ -18,7 +24,8 @@ services:
       - MYSQL_PWD=${MYSQL_PASSWORD}
       - MYSQL_DB=todo
     networks:
-      - back
+      - back 
+      - traefik
   db:
     image: mysql
     volumes:
@@ -31,9 +38,12 @@ services:
       - MYSQL_DATABASE=todo
     networks:
       - back
+
 volumes:
   db-volume:
 
 networks:
+  traefik:
+    external: true
   front:
   back:
